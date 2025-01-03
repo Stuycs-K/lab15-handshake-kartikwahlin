@@ -11,11 +11,15 @@
   =========================*/
 int server_setup() {
   int from_client = 0;
+  mkfifo(WKP,0666);
+  int fifofd = open(WKP, O_RDONLY);
+  from_client = fifofd;
+  unlink(WKP);
   return from_client;
 }
 
 /*=========================
-  server_handshake 
+  server_handshake
   args: int * to_client
 
   Performs the server side pipe 3 way handshake.
@@ -24,7 +28,14 @@ int server_setup() {
   returns the file descriptor for the upstream pipe (see server setup).
   =========================*/
 int server_handshake(int *to_client) {
-  int from_client;
+  int from_client = server_setup();
+  int piddler;
+  read(from_client,&piddler,sizeof(&piddler));
+  int fifofd = open(&piddler,O_WRONLY);
+  int SYNACK = piddler+1;
+  *to_client = fifofd;
+  write(fifofd, &SYNACK,sizeof(&SYNACK)); // SYNACK is the return value(PID + 1)
+  read(from_client,&piddler,sizeof(&piddler)); //Uses same "PIDDLER" var for all reads
   return from_client;
 }
 
@@ -56,5 +67,3 @@ int server_connect(int from_client) {
   int to_client  = 0;
   return to_client;
 }
-
-
