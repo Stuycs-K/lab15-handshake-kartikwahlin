@@ -31,9 +31,9 @@ int server_handshake(int *to_client) {
   printf("Server start\n");
   int from_client = server_setup();
   int piddler;
-  read(from_client,&piddler,sizeof(piddler));
-  printf("Server reads %d via WKP\n",piddler);
   char fiddler[4];
+  read(from_client,&piddler,sizeof(piddler));//NEEDS TO USE FIDDLER FOR THE READ TARGET MY GUYS
+  printf("Server reads %d via WKP\n",piddler);
   sprintf(fiddler, "%d",piddler);
   int fifofd = open(fiddler,O_WRONLY);
   int synack = piddler+1;
@@ -64,15 +64,15 @@ int client_handshake(int *to_server) {
   mkfifo(fiddy,0666);
   printf("PP created\n");
   int fifofd = open(WKP, O_WRONLY); //FIFOFD IS WKP HERE
-  write(fifofd, &griddy,sizeof(&griddy));
-  printf("Client wrote %d via WKP\n",griddy);
+  write(fifofd, fiddy,sizeof(fiddy));
+  printf("Client wrote %d via WKP\n",griddy);//WIP - SEND STRING PID AN JUST USE THAT BRO
   int wrfd = open(fiddy,O_RDONLY);//OPEN THE PP
   unlink(fiddy);
-  return from_server;
   int synack;
   read(wrfd,&synack,sizeof(synack));
   int ack = synack + 1;
   write(fifofd, &ack,sizeof(ack));
+  return from_server;
 }
 
 
