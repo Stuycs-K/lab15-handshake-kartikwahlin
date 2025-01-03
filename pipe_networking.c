@@ -30,12 +30,12 @@ int server_setup() {
 int server_handshake(int *to_client) {
   int from_client = server_setup();
   int piddler;
-  read(from_client,&piddler,sizeof(&piddler));
+  read(from_client,&piddler,sizeof(piddler));
   int fifofd = open(&piddler,O_WRONLY);
-  int SYNACK = piddler+1;
+  int synack = piddler+1;
   *to_client = fifofd;
-  write(fifofd, &SYNACK,sizeof(&SYNACK)); // SYNACK is the return value(PID + 1)
-  read(from_client,&piddler,sizeof(&piddler)); //Uses same "PIDDLER" var for all reads
+  write(fifofd, &synack,sizeof(synack)); // synack is the return value(PID + 1)
+  read(from_client,&piddler,sizeof(piddler)); //Uses same "PIDDLER" var for all reads
   return from_client;
 }
 
@@ -51,7 +51,18 @@ int server_handshake(int *to_client) {
   =========================*/
 int client_handshake(int *to_server) {
   int from_server;
+  int * griddy;
+  *griddy = getpid();
+  mkfifo(griddy,0666);
+  int fifofd = open(WKP, O_WRONLY); //FIFOFD IS WKP HERE
+  write(fifofd, griddy,sizeof(griddy));
+  int wrfd = open(griddy,O_RDONLY);
+  unlink(griddy);
   return from_server;
+  int synack;
+  read(*griddy,&synack,sizeof(synack));
+  int ack = synack + 1;
+  write(fifofd, &ack,sizeof(ack));
 }
 
 
