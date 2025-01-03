@@ -28,10 +28,14 @@ int server_setup() {
   returns the file descriptor for the upstream pipe (see server setup).
   =========================*/
 int server_handshake(int *to_client) {
+  printf("Server start\n");
   int from_client = server_setup();
   int piddler;
   read(from_client,&piddler,sizeof(piddler));
-  int fifofd = open(&piddler,O_WRONLY);
+  printf("Server reads %d via WKP\n",piddler);
+  char fiddler[4];
+  sprintf(fiddler, "%d",piddler);
+  int fifofd = open(fiddler,O_WRONLY);
   int synack = piddler+1;
   *to_client = fifofd;
   write(fifofd, &synack,sizeof(synack)); // synack is the return value(PID + 1)
@@ -50,17 +54,23 @@ int server_handshake(int *to_client) {
   returns the file descriptor for the downstream pipe.
   =========================*/
 int client_handshake(int *to_server) {
+  printf("Client start\n");
   int from_server;
-  int * griddy;
-  *griddy = getpid();
-  mkfifo(griddy,0666);
+  int griddy;
+  griddy = getpid();
+  printf("PID gotten\n");
+  char fiddy[4];
+  sprintf(fiddy, "%d",griddy);
+  mkfifo(fiddy,0666);
+  printf("PP created\n");
   int fifofd = open(WKP, O_WRONLY); //FIFOFD IS WKP HERE
-  write(fifofd, griddy,sizeof(griddy));
-  int wrfd = open(griddy,O_RDONLY);
-  unlink(griddy);
+  write(fifofd, &griddy,sizeof(&griddy));
+  printf("Client wrote %d via WKP\n",griddy);
+  int wrfd = open(fiddy,O_RDONLY);//OPEN THE PP
+  unlink(fiddy);
   return from_server;
   int synack;
-  read(*griddy,&synack,sizeof(synack));
+  read(wrfd,&synack,sizeof(synack));
   int ack = synack + 1;
   write(fifofd, &ack,sizeof(ack));
 }
