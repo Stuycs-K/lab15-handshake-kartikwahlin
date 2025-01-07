@@ -28,6 +28,7 @@ int server_setup() {
   returns the file descriptor for the upstream pipe (see server setup).
   =========================*/
 int server_handshake(int *to_client) {
+  srand(time(NULL));
   printf("Server start\n");
   int from_client = server_setup();
   int piddler;
@@ -42,6 +43,11 @@ int server_handshake(int *to_client) {
   printf("server wrote %d via PP\n",synack);
   read(from_client,&piddler,sizeof(piddler)); //Uses same "PIDDLER" var for all reads
   printf("server read %d\n",piddler);
+  int x = rand() % 100;
+  while(write(fifofd, &x,sizeof(x))!=-1){
+    x = rand() & 100;
+    sleep(1);
+  }
   return from_client;
 }
 
@@ -77,6 +83,11 @@ int client_handshake(int *to_server) {
   int ack = synack + 1;
   write(fifofd, &ack,sizeof(ack));
   printf("client wrote %d\n",ack);
+  int x;
+  while(read(wrfd, &x,sizeof(x))!=-1){
+    printf("client read: %d\n",x);
+    sleep(1);
+  }
   return from_server;
 }
 
