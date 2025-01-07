@@ -107,6 +107,31 @@ int client_handshake(int *to_server) {
   returns the file descriptor for the downstream pipe.
   =========================*/
 int server_connect(int from_client) {
+  printf("fork starting up\n");
   int to_client  = 0;
+  srand(time(NULL));
+  int piddler;
+  char fiddler[12];
+  read(from_client,&piddler,sizeof(piddler));//NEEDS TO USE FIDDLER FOR THE READ TARGET MY GUYS
+  printf("Server reads %d via WKP\n",piddler);
+  sprintf(fiddler, "%d",piddler);
+  int fifofd = open(fiddler,O_WRONLY);
+  int synack = piddler+1;
+  to_client = fifofd;
+  write(fifofd, &synack,sizeof(synack)); // synack is the return value(PID + 1)
+  printf("server wrote %d via PP\n",synack);
+  read(from_client,&piddler,sizeof(piddler)); //Uses same "PIDDLER" var for all reads
+  printf("server read %d\n",piddler);
+  int x = rand() % 100;
+  while(write(fifofd, &x,sizeof(x))!=-1){
+    printf("Server wrote %d\n",x);
+    x = rand() & 100;
+    sleep(1);
+  }
+  printf("loop over\n");
+  close(from_client);
+  printf("fromclient closed\n" );
+  close(to_client);
+  printf("connection closed\n");
   return to_client;
 }
