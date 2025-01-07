@@ -9,15 +9,18 @@
 static void sighandler(int signo){
   if(signo==SIGINT){
     printf("SIGINT caught\n");
+    unlink(WKP);
     exit(0);
   }
 }
 
 int main() {
   signal(SIGINT,sighandler);
-  int to_server;
-  int from_server;
-
-  from_server = client_handshake( &to_server );
+  signal(SIGPIPE, SIG_IGN);
+  int to_client;
+  int from_client;
+  while(1){
+    from_client = server_handshake( &to_client );
+  }
 
 }

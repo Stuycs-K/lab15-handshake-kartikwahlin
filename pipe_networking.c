@@ -45,9 +45,15 @@ int server_handshake(int *to_client) {
   printf("server read %d\n",piddler);
   int x = rand() % 100;
   while(write(fifofd, &x,sizeof(x))!=-1){
+    printf("Server wrote %d\n",x);
     x = rand() & 100;
     sleep(1);
   }
+  printf("loop over\n");
+  close(from_client);
+  printf("fromclient closed\n" );
+  close(*to_client);
+  printf("connection closed\n");
   return from_client;
 }
 
@@ -84,7 +90,7 @@ int client_handshake(int *to_server) {
   write(fifofd, &ack,sizeof(ack));
   printf("client wrote %d\n",ack);
   int x;
-  while(read(wrfd, &x,sizeof(x))!=-1){
+  while(read(wrfd, &x,sizeof(x))>0){
     printf("client read: %d\n",x);
     sleep(1);
   }
